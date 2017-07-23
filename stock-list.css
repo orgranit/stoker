@@ -9,6 +9,10 @@ html{
 
 .content-container{
   background-color: #ffffff;
+  font-size: 1.5rem;
+  font-family: Avenir;
+  font-weight: 100;
+  color: #59737c;
 }
 
 .flex-sb-center{
@@ -18,7 +22,13 @@ html{
 }
 
 .header{
-  margin: 0 20px;
+  padding: 0 20px;
+  text-transform: uppercase;
+  color: #41bf15;
+  font-size: 2.2rem;
+  font-weight: 600;
+  font-family: "Lucida Grande";
+  border-bottom: solid #f0f4f7;
 }
 
 .header-buttons{
@@ -27,14 +37,45 @@ html{
   justify-content: space-around;
 }
 
+.header-icon{
+  margin-left: 5px;
+  font-size: 2rem;
+  border: none;
+  background-color: transparent;
+}
+
+
 .stock-list{
   list-style: none;
-  margin: 0 20px;
   padding: 0px;
+  margin: 0px;
 }
 
 .stock-item{
+  padding: 20px 20px;
+  border-bottom: solid #f0f4f7;
+}
 
+.stock-right{
+  width: 250px;
+}
+
+.btn-stock{
+  border-radius: 10px;
+  font-size: 1.8rem;
+  font-family: Avenir;
+  font-weight: 100;
+  color: white;
+  border: none;
+  width: 130px;
+}
+
+.btn-red{
+  background-color: #ff4f46;
+}
+
+.btn-green{
+  background-color: #63da39;
 }
 
 .up-down-arrows{
@@ -42,8 +83,22 @@ html{
   flex-direction: column;
 }
 
+.icon-arrow {
+  border: none;
+  background-color: transparent;
+  outline: none;
+  font-size: 1.2rem;
+  color: #ababab;
+
+}
+
+.icon-arrow:disabled{
+  color: rgba(171, 171, 171, 0.2);
+}
+
 .arrow-down {
   transform: scale(1, -1);
+  border: none;
 }
 
 

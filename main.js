@@ -1,96 +1,104 @@
-const stocks = [
-  {
-    "Symbol": "WIX",
-    "Name": "Wix.com Ltd.",
-    "Change": "0.750000",
-    "PercentChange": "+1.51%",
-    "LastTradePriceOnly": "76.099998"
-  },
-  {
-    "Symbol": "MSFT",
-    "Name": "Microsoft Corporation",
-    "PercentChange": "-2.09%",
-    "Change": "-0.850006",
-    "LastTradePriceOnly": "69.620003"
-  },
-  {
-    "Symbol": "YHOO",
-    "Name": "Yahoo! Inc.",
-    "Change": "0.279999",
-    "PercentChange": "+1.11%",
-    "LastTradePriceOnly": "50.599998"
+(() => {
+  'use strict';
+  const stocks = getStocks();
+  const stockMode = ['PercentChange', 'Change'];
+  const state = {
+    ui: {
+      dailyChange: stockMode[0]
+    }
+  };
+
+  function getStockChange(stock) {
+    return stock[state.ui.dailyChange];
   }
-];
 
-function buildHeader() {
-  return `<span>stoker</span>
+  function getButtonColor(stock) {
+    return stock.Change < 0 ? 'btn-red' : 'btn-green';
+  }
+
+
+  function moveStocksElement(symbol, direction) {
+    const stockIndex = stocks.findIndex((stock) => stock.Symbol === symbol);
+
+    const stockToMove = stocks[stockIndex];
+    stocks[stockIndex] = stocks[stockIndex + direction];
+    stocks[stockIndex + direction] = stockToMove;
+
+  }
+
+  function renderHeader() {
+    const headerElm = document.querySelector('.header');
+    headerElm.innerHTML = `<span>stokr</span>
           <ul class="header-buttons">
-            <li><button class="icon-search"></button></li>
-            <li><button class="icon-refresh"></button></li>
-            <li><button class="icon-filter"></button></li>
-            <li><button class="icon-settings"></button></li>
+            <li><button class="icon-search header-icon"></button></li>
+            <li><button class="icon-refresh header-icon"></button></li>
+            <li><button class="icon-filter header-icon"></button></li>
+            <li><button class="icon-settings header-icon"></button></li>
           </ul>`
-}
+  }
 
-function buildStocksList(stocks){
-  return `<ul class="stock-list">
+  function renderStocks(stocks) {
+    const stocksElm = document.querySelector('.main');
+    stocksElm.innerHTML = `<ul class="stock-list">
             ${ stocks.map(buildStockItem).join('') }
           </ul>`;
-}
+  }
 
-function buildStockItem(stock, index, stocks) {
-  const stockChange = isPercent ? stock.PercentChange : stock.Change;
-  const disabledUp = index === 0 ? 'disabled' : '';
-  const disabledDown = index === stocks.length - 1 ? 'disabled' : '';
+  function buildStockItem(stock, index, stocks) {
+    const stockChange = Number(Number(getStockChange(stock)).toFixed(2)) || getStockChange(stock);
+    const disabledUp = index === 0 ? 'disabled' : '';
+    const disabledDown = index === stocks.length - 1 ? 'disabled' : '';
 
-  return `<li class="stock-item flex-sb-center">
-            <span>${ stock.Symbol }(${ stock.Name })</span>
-            <div class="flex-sb-center">
-              <span>${ stock.LastTradePriceOnly }</span>
-              <button data-type="stock-change-btn">${ stockChange }</button>
+    return `<li class="stock-item flex-sb-center">
+            <span>${ stock.Symbol } (${ stock.Name })</span>
+            <div class="stock-right  flex-sb-center">
+              <span>${ Number(stock.LastTradePriceOnly).toFixed(2) }</span>
+              <button class='btn-stock  ${getButtonColor(stock)}' data-type="stock-change-btn">
+${ stockChange }</button>
               <div class="up-down-arrows">
                 <button data-id="${ stock.Symbol }" data-type="arrow-up-btn" class="icon-arrow arrow-up" 
 ${disabledUp}></button>
-                <button data-id="${ stock.Symbol }" data-type="arrow-down-btn" class="icon-arrow arrow-down" ${disabledDown}></button>
+                <button data-id="${ stock.Symbol }" data-type="arrow-down-btn" class="icon-arrow arrow-down"
+${disabledDown}></button>
               </div>
             </div>
           </li>`;
-}
-
-function moveStocksElement(symbol, direction) {
-  const stockIndex = stocks.findIndex((stock) => stock.Symbol === symbol);
-
-  const stockToMove = stocks[stockIndex];
-  stocks[stockIndex] = stocks[stockIndex + direction];
-  stocks[stockIndex + direction] = stockToMove;
-
-}
-
-function onChangeButtonClick(event) {
-  switch (event.target.getAttribute('data-type')) {
-    case 'stock-change-btn':
-      isPercent = !isPercent;
-      mainElm.innerHTML = buildStocksList(stocks);
-      break;
-    case 'arrow-up-btn':
-      moveStocksElement(event.target.getAttribute('data-id'), -1);
-      mainElm.innerHTML = buildStocksList(stocks);
-      break;
-    case 'arrow-down-btn':
-      moveStocksElement(event.target.getAttribute('data-id'), 1);
-      mainElm.innerHTML = buildStocksList(stocks);
-      break;
-    default:
-      // do nothing
   }
-}
 
-const rootElm = document.querySelector('#root');
-const headerElm = rootElm.querySelector('.header');
-const mainElm = rootElm.querySelector('.main');
-let isPercent = true;
+  function onButtonClick(event) {
+    const actions = {
+      'stock-change-btn': function () {
+        state.ui.dailyChange = stockMode[(stockMode.indexOf(state.ui.dailyChange) + 1) % stockMode.length];
+        renderStocks(stocks);
+      },
+      'arrow-up-btn': function () {
+        moveStocksElement(event.target.getAttribute('data-id'), -1);
+        renderStocks(stocks);
+      },
+      'arrow-down-btn': function () {
+        moveStocksElement(event.target.getAttribute('data-id'), 1);
+        renderStocks(stocks);
+      }
+    };
 
-headerElm.innerHTML = buildHeader();
-mainElm.innerHTML = buildStocksList(stocks);
-mainElm.addEventListener("click", onChangeButtonClick);
+    return actions[event.target.getAttribute('data-type')]();
+  }
+
+  function renderRoot() {
+    const rootElm = document.querySelector('#root');
+
+    rootElm.innerHTML = `<div class="content-container">
+        <div class="header flex-sb-center"></div>
+        <div class="main"></div>
+      </div>`;
+
+    renderHeader();
+    renderStocks(stocks);
+
+    rootElm.addEventListener("click", onButtonClick);
+  }
+
+  renderRoot();
+})();
+
 

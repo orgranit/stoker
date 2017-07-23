@@ -1,14 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="45px" height="39px" viewBox="0 0 45 39" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 44 (41411) - http://www.bohemiancoding.com/sketch -->
-    <title>Path 2</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="004-Change-Millions" transform="translate(-1204.000000, -105.000000)" stroke="#8F8F8F">
-            <g id="Group-9" transform="translate(1128.000000, 93.000000)">
-                <polygon id="Path-2" points="76 13.1985112 121 13 102.626861 30.5814206 102.626861 45.15617 93.6643921 50.1184864 93.6643921 30.5899504"></polygon>
-            </g>
-        </g>
-    </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 21.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 48.8 39" style="enable-background:new 0 0 48.8 39;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#8F8F8F;}
+</style>
+<g id="Page-1">
+	<g id="_x30_04-Change-Millions" transform="translate(-1204.000000, -105.000000)">
+		<g id="Group-9" transform="translate(1128.000000, 93.000000)">
+			<g id="Path-2">
+				<path class="st0" d="M95,51V30.8L76.7,12.7l47.5-0.2L105,30.8v14.7L95,51z M79.1,13.7L96,30.4v18.9l8-4.4V30.4l17.6-16.9
+					L79.1,13.7z"/>
+			</g>
+		</g>
+	</g>
+</g>
 </svg>
