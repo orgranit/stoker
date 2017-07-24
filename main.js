@@ -3,26 +3,47 @@
 
   const Model = window.STKR.Model;
   const View = window.STKR.View;
+  const state = Model.state;
+  const uiState = {};
+
 
   /* Controller */
-  function onButtonClick(event) {
+  function onButtonClick(args) {
     const actions = {
       'stock-change-btn': function () {
-        Model.toggleStockMode();
+        toggleStockMode();
       },
       'arrow-up-btn': function () {
-        Model.swapStocks(event.target.getAttribute('data-id'), -1);
+        swapStocks(args['dataId'], -1);
       },
       'arrow-down-btn': function () {
-        Model.swapStocks(event.target.getAttribute('data-id'), 1);
+        swapStocks(args['dataId'], 1);
       }
+
     };
 
-    actions[event.target.getAttribute('data-type')]();
-    View.renderStocks(buildMinimalStocksData(Model.state.data.stocks, Model.state.data.stockModes, Model.state.ui.stockMode));
+    if(actions[args['dataType']]){
+      actions[args['dataType']]();
+    }
+
+    buildDataToUI();
+    View.renderRoot(uiState);
   }
 
-  function buildMinimalStocksData(stocks, stocksModes, modeIdx) {
+  function toggleStockMode() {
+    state.ui.stockMode = (state.ui.stockMode + 1) % state.data.stockModes.length;
+  }
+
+  function swapStocks(symbol, direction) {
+    const stockIndex = state.data.stocks.findIndex((stock) => stock.Symbol === symbol);
+
+    const stockToMove = state.data.stocks[stockIndex];
+    state.data.stocks[stockIndex] = state.data.stocks[stockIndex + direction];
+    state.data.stocks[stockIndex + direction] = stockToMove;
+
+  }
+
+  function buildStocksByMode(stocks, stocksModes, modeIdx) {
     const stockMode = stocksModes[modeIdx];
     return stocks.reduce((minimalStocksData, stock) => {
       let newStock = {change: stock[stockMode]};
@@ -37,8 +58,15 @@
     }, []);
   }
 
-  View.setOnButtonClickDelegate(onButtonClick);
-  View.renderRoot(buildMinimalStocksData(Model.state.data.stocks, Model.state.data.stockModes, Model.state.ui.stockMode));
+  function buildDataToUI() {
+    uiState.isFilterOn = state.ui.isFilterOn;
+    uiState.data = {};
+    uiState.data.stocks = buildStocksByMode(state.data.stocks, state.data.stockModes, state.ui.stockMode);;
+  }
+
+  buildDataToUI();
+  View.subscribe('click',onButtonClick);
+  View.renderRoot(uiState);
 })();
 
 

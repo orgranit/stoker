@@ -4,14 +4,34 @@
   window.STKR = window.STKR || {};
 
   /* View */
+  const eventHandlers = {};
+  const subscribe = function (eventId, func) {
+    if (!eventHandlers[eventId]) {
+      eventHandlers[eventId] = [];
+    }
 
-  let onButtonClickDelegate;
-
-  function setOnButtonClickDelegate(func) {
-    onButtonClickDelegate = func;
+    eventHandlers[eventId].push({func: func});
   }
 
-  function renderRoot(stocks) {
+  const publish = function (event) {
+    const eventId = event.type;
+    const closestAncestor = event.target.closest('li') || event.target;
+    const args = { dataId: closestAncestor.getAttribute('data-id'),
+                   dataType: event.target.getAttribute('data-type')}
+
+    if (!eventHandlers[eventId]) {
+      return false;
+    }
+
+    let subscribers = eventHandlers[eventId],
+      len = subscribers ? subscribers.length : 0;
+
+    while (len--) {
+      subscribers[len].func(args);
+    }
+  };
+
+  function renderRoot(uiState) {
     const rootElm = document.querySelector('#root');
 
     rootElm.innerHTML = `<div class="content-container">
@@ -20,11 +40,12 @@
       </div>`;
 
     renderHeader();
-    renderStocks(stocks);
+    renderStocks(uiState.data.stocks);
+    renderFilterPanel(uiState.isFilterOn)
 
-    if(onButtonClickDelegate){
-      rootElm.addEventListener("click", onButtonClickDelegate);
-    }
+    Object.keys(eventHandlers).forEach((eventId) => {
+      rootElm.addEventListener(eventId, publish);
+    })
   }
 
   function renderHeader() {
@@ -38,8 +59,11 @@
           </ul>`
   }
 
+  function renderFilterPanel(isFilterOn) {
+    console.log(isFilterOn);
+  }
+
   function renderStocks(stocks) {
-    console.log(stocks);
     const stocksElm = document.querySelector('.main');
     stocksElm.innerHTML = `<ul class="stock-list">
             ${ stocks.map(buildStockItem).join('') }
@@ -51,16 +75,16 @@
     const disabledUp = index === 0 ? 'disabled' : '';
     const disabledDown = index === stocks.length - 1 ? 'disabled' : '';
 
-    return `<li class="stock-item flex-sb-center">
+    return `<li data-id="${ stock.Symbol }" class="stock-item flex-sb-center">
             <span>${ stock.Symbol } (${ stock.Name })</span>
             <div class="stock-right  flex-sb-center">
               <span>${ Number(stock.LastTradePriceOnly).toFixed(2) }</span>
               <button class='btn-stock  ${getButtonColor(stock)}' data-type="stock-change-btn">
 ${ stockChange }</button>
               <div class="up-down-arrows">
-                <button data-id="${ stock.Symbol }" data-type="arrow-up-btn" class="icon-arrow arrow-up" 
+                <button data-type="arrow-up-btn" class="icon-arrow arrow-up" 
 ${disabledUp}></button>
-                <button data-id="${ stock.Symbol }" data-type="arrow-down-btn" class="icon-arrow arrow-down"
+                <button data-type="arrow-down-btn" class="icon-arrow arrow-down"
 ${disabledDown}></button>
               </div>
             </div>
@@ -72,10 +96,8 @@ ${disabledDown}></button>
   }
 
   window.STKR.View = {
-    setOnButtonClickDelegate,
+    subscribe,
     renderRoot,
-    renderHeader,
-    renderStocks,
   };
 
 })();
