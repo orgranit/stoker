@@ -3,23 +3,25 @@
   /* Model */
   window.STKR = window.STKR || {};
 
-  const stocks = getStocks();
-
   const state = {
     ui: {
       stockMode: 0,
       isFilterOn: false
     },
     data: {
-      stocks: stocks,
+      stocks: [],
       stockModes: ['PercentChange', 'Change']
     }
   };
 
+  function getState() {
+    return state;
+  }
+
 
 
   window.STKR.Model = {
-    state
+    getState
   };
 
 })();

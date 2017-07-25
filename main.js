@@ -1,14 +1,13 @@
 (() => {
   'use strict';
-
   const Model = window.STKR.Model;
   const View = window.STKR.View;
-  const state = Model.state;
+  let state = Model.getState();
   const uiState = {};
 
 
   /* Controller */
-  function onButtonClick(args) {
+  function onClickHandler(args) {
     const actions = {
       'stock-change-btn': function () {
         toggleStockMode();
@@ -18,16 +17,21 @@
       },
       'arrow-down-btn': function () {
         swapStocks(args['dataId'], 1);
+      },
+      'filter-toggle-btn': function () {
+        state.ui.isFilterOn = !state.ui.isFilterOn;
       }
 
     };
 
     if(actions[args['dataType']]){
+
       actions[args['dataType']]();
+      buildDataToUI();
+      View.renderRoot(uiState);
     }
 
-    buildDataToUI();
-    View.renderRoot(uiState);
+
   }
 
   function toggleStockMode() {
@@ -64,9 +68,26 @@
     uiState.data.stocks = buildStocksByMode(state.data.stocks, state.data.stockModes, state.ui.stockMode);;
   }
 
-  buildDataToUI();
-  View.subscribe('click',onButtonClick);
-  View.renderRoot(uiState);
+  function fetchStocks() {
+    fetch('mocks/stocks.js')
+      .then((res) => res.json())
+      .then((res) => {
+        state.data.stocks = res;
+        renderView();
+      });
+
+  }
+
+  function renderView() {
+    buildDataToUI();
+    View.renderRoot(uiState);
+    View.unsubscribeAll();
+    View.subscribe('click', onClickHandler, false);
+    View.subscribe('hashchange',fetchStocks, true);
+  }
+
+  fetchStocks();
+
 })();
 
 

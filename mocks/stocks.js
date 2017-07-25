@@ -1,5 +1,4 @@
-function getStocks() {
-  return [
+[
     {
       "Symbol": "WIX",
       "Name": "Wix.com Ltd.",
@@ -21,5 +20,5 @@ function getStocks() {
       "PercentChange": "+1.11%",
       "LastTradePriceOnly": "50.599998"
     }
-  ];
-}
+]
+
