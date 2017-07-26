@@ -7,16 +7,19 @@
 
 
   /* Controller */
-  function onClickHandler(args) {
+  function onClickHandler(eventName, eventData) {
+    const dataId = eventData['dataId'];
+    const dataType = eventData['dataType'];
+
     const actions = {
       'stock-change-btn': function () {
         toggleStockMode();
       },
       'arrow-up-btn': function () {
-        swapStocks(args['dataId'], -1);
+        swapStocks(dataId, -1);
       },
       'arrow-down-btn': function () {
-        swapStocks(args['dataId'], 1);
+        swapStocks(dataId, 1);
       },
       'filter-toggle-btn': function () {
         state.ui.isFilterOn = !state.ui.isFilterOn;
@@ -24,14 +27,11 @@
 
     };
 
-    if(actions[args['dataType']]){
-
-      actions[args['dataType']]();
+    if(actions[dataType]){
+      actions[dataType]();
       buildDataToUI();
       View.renderRoot(uiState);
     }
-
-
   }
 
   function toggleStockMode() {
@@ -40,11 +40,9 @@
 
   function swapStocks(symbol, direction) {
     const stockIndex = state.data.stocks.findIndex((stock) => stock.Symbol === symbol);
-
     const stockToMove = state.data.stocks[stockIndex];
     state.data.stocks[stockIndex] = state.data.stocks[stockIndex + direction];
     state.data.stocks[stockIndex + direction] = stockToMove;
-
   }
 
   function buildStocksByMode(stocks, stocksModes, modeIdx) {
@@ -55,7 +53,7 @@
         if(!stocksModes.includes(key)){
           newStock[key] = stock[key];
         }
-      })
+      });
       minimalStocksData.push(newStock);
 
       return minimalStocksData;
@@ -75,17 +73,15 @@
         state.data.stocks = res;
         renderView();
       });
-
   }
 
   function renderView() {
     buildDataToUI();
     View.renderRoot(uiState);
-    View.unsubscribeAll();
-    View.subscribe('click', onClickHandler, false);
-    View.subscribe('hashchange',fetchStocks, true);
   }
 
+  window.STKR.PubSub.subscribe('view-clicked', onClickHandler);
+  window.addEventListener('hashchange', fetchStocks);
   fetchStocks();
 
 })();
