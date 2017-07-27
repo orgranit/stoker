@@ -15,6 +15,8 @@
     let args = {};
     if(event.type === 'submit'){
       args = filtersSubmitHandler(event);
+    }else if(event.type === 'keyup'){
+      args = event.target.value;
     } else {
       const closestAncestor = event.target.closest('li') || event.target;
       args = { dataId: closestAncestor.getAttribute('data-id'),
@@ -33,15 +35,41 @@
     }
   };
 
-  function renderSearchHeader() {
+  function renderSearchHeader(query) {
     const headerElm = document.querySelector('.header');
     headerElm.innerHTML += `
-                      <input type="text" class="search-input">
+                      <input type="text" class="search-input" autofocus="autofocus" value=${query}>
                       <button class="btn-search-cancel"><a href="#">Cancel</a></button>`
+
+    document.querySelector('.search-input').focus();
   }
 
-  function renderSearchBody() {
+  function buildSearchStockItem(userStocks ,stock) {
+    return `<li data-id="${ stock.symbol }" class="stock-item flex-sb-center">
+              <div class="stock-search-txt  flex-sb-center">
+                <span>${ stock.symbol } (${ stock.name })</span>
+                <span><b>${ stock.exchDisp }</b></span>
+              </div>
+              <button data-type="add-stock-btn" class="add-stock-btn" ${userStocks.includes(stock.symbol) ? 'disabled' : '' }>
+                +
+              </button>
+            </li>`
+  }
 
+  function renderSearchBody(wasSearched ,searchStocks, userStocks) {
+    const mainElm = document.querySelector('.main');
+    mainElm.innerHTML += `
+        <div class="search-container">
+            <div class="search-place-holders-container ${ searchStocks.length > 0 ? 'hidden' : '' }">
+              <div class="icon-search-place-holder search-place-holder"></div>
+              <span class="search-txt"> ${ wasSearched ? 'Not Found' : 'Search' } </span>
+            </div >
+            <div class="search-results-container">
+              <ul class="stock-list">
+            ${ searchStocks.map(buildSearchStockItem.bind(null, userStocks)).join('') }
+          </ul>
+            </div>
+        </div>`
   }
 
   function renderStocksHeader(isFilterOn) {
@@ -65,7 +93,12 @@
           </ul>`
   }
 
-  function renderFilterPanel(isFilterOn) {
+  function renderFilterPanel(isFilterOn, filters) {
+    const name = filters.name;
+    const trend = filters.trend.toLowerCase();
+    const rangeFrom = filters.range[0];
+    const rangeTo = filters.range[1];
+
     const mainElm = document.querySelector('.main');
     mainElm.innerHTML += `
       <form>
@@ -73,23 +106,23 @@
             <div class="filter-list">
               <div class="filter-item">
                 <label for="name">By Name</label> 
-                <input type="text" name="name" id="name" class="filter-input">
+                <input type="text" name="name" id="name" class="filter-input" value = ${ name }>
               </div>
               <div class="filter-item">
                 <label for="range-from">By Range: From</label>
-                <input type="text" name="range-from" id="range-from" class="filter-input">
+                <input type="text" name="range-from" id="range-from" class="filter-input" value = ${ rangeFrom }>
               </div>
               <div class="filter-item">
                 <label for="trend">By Gain</label>
                 <select name="trend" id="trend" class="filter-input"> 
-                  <option value="all" selected>All</option> 
-                  <option value="losing">Losing</option>
-                  <option value="gaining">Gaining</option>
+                  <option value="all" ${ trend === 'all' ? 'selected' : '' }>All</option> 
+                  <option value="losing" ${ trend === 'losing' ? 'selected' : '' }>Losing</option>
+                  <option value="gaining" ${ trend === 'gaining' ? 'selected' : '' }>Gaining</option>
                 </select>
               </div>
               <div class="filter-item">
                 <label for="range-to">By Range: To</label> 
-                <input type="text" name="range-to" id="range-to" class="filter-input">
+                <input type="text" name="range-to" id="range-to" class="filter-input" value = ${ rangeTo }>
               </div>
             </div>
             <input type="submit" class="btn-filter-apply">
@@ -151,11 +184,11 @@ ${disabledDown}></button>
       </div>`;
 
     if(window.location.hash.slice(1) === 'search'){
-      renderSearchHeader();
-      renderSearchBody();
+      renderSearchHeader(uiState.searchQuery);
+      renderSearchBody(uiState.searchQuery !== '', uiState.searchStocks, uiState.userStocks);
     } else {
       renderStocksHeader(uiState.isFilterOn);
-      renderFilterPanel(uiState.isFilterOn);
+      renderFilterPanel(uiState.isFilterOn, uiState.filters);
       renderStocks(uiState.data.stocks, uiState.isFilterOn);
     }
   }

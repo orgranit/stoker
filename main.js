@@ -6,29 +6,57 @@
   const View = window.STKR.View;
   const state = Model.getState();
   state.ui = JSON.parse(localStorage.getItem('uiState')) || state.ui;
-  const uiState = {};
+  let uiState = state.ui;
 
   function onClickHandler(args) {
     const actions = {
       'stock-change-btn': function () {
         toggleStockMode();
+        renderView();
       },
       'arrow-up-btn': function () {
         swapStocksBySymbol(args['dataId'], -1);
+        renderView();
       },
       'arrow-down-btn': function () {
         swapStocksBySymbol(args['dataId'], 1);
+        renderView();
       },
       'filter-toggle-btn': function () {
         state.ui.isFilterOn = !state.ui.isFilterOn;
+        renderView();
+      },
+      'add-stock-btn': function () {
+        state.ui.userStocks.push(args['dataId']);
+        fetchStocks();
       }
 
     };
 
     if(actions[args['dataType']]){
       actions[args['dataType']]();
-      renderView();
     }
+  }
+
+  function buildSearchStocks(stocks) {
+    return stocks.map((stock) => {
+      const searchStock = {};
+      searchStock.name = stock.name;
+      searchStock.symbol = stock.symbol;
+      searchStock.exchDisp = stock.exchDisp;
+
+      return searchStock;
+    })
+  }
+
+  function onKeyUpHandler(query) {
+    state.ui.searchQuery = query;
+    fetch(`http://localhost:7000/search?q=${ query }`)
+      .then((res) => res.json())
+      .then((res) => {
+        state.ui.searchStocks = buildSearchStocks(res.ResultSet.Result);
+        renderView();
+      });
   }
 
   function toggleStockMode() {
@@ -108,11 +136,10 @@
       LastTradePriceOnly: 'LastTradePriceOnly',
       Change: state.data.stockModes[state.ui.stockMode]};
 
-    uiState.isFilterOn = state.ui.isFilterOn;
-    uiState.filters = state.ui.filters;
+    uiState = state.ui;
     uiState.data = {};
 
-    const filteredStocks = filterStocks(state.data.stocks, state.ui.filters);
+    const filteredStocks = state.ui.isFilterOn ? filterStocks(state.data.stocks, state.ui.filters) : state.data.stocks;
     uiState.data.stocks = buildMinimalStocks(filteredStocks, props, state.data.stockChangeSuffix[state.ui.stockMode]);
   }
 
@@ -121,6 +148,7 @@
       .then((res) => res.json())
       .then((res) => {
         state.data.stocks = res.query.results.quote;
+        console.log(res.query.results.quote);
         subscribeEventListeners();
         renderView();
       });
@@ -137,6 +165,7 @@
     View.subscribe('click', onClickHandler, false);
     View.subscribe('submit', setFilters, false);
     View.subscribe('hashchange',renderView, true);
+    View.subscribe('keyup', onKeyUpHandler, false);
   }
 
   function saveUIState() {

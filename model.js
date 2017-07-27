@@ -14,9 +14,11 @@
       filters: {
         name: '',
         trend: 'All',
-        range: ['NaN', 'NaN']
+        range: ['', '']
       },
-      userStocks: ["WIX","MTCH","GOOG","AAPL","YHOO"]
+      userStocks: ['WIX','MTCH','GOOG','AAPL','YHOO'],
+      searchStocks: [],
+      searchQuery: ''
     },
     data: {
       stocks: [],
